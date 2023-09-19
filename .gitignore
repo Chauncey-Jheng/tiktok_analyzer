@@ -1,0 +1,6 @@
+.venv/
+openvino_notebooks/
+/*.mp4
+/*.flv
+/*.log
+/*.json
