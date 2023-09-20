@@ -5,6 +5,7 @@ openvino_notebooks/
 /*.flv
 /*.log
 /*.json
+!result.json
 /*.wav
 !test.wav
 !test_format.wav
