@@ -9,3 +9,5 @@ openvino_notebooks/
 /*.wav
 !test.wav
 !test_format.wav
+/*.txt
+!test_format.txt

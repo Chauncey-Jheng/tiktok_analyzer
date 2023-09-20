@@ -67,17 +67,29 @@ def wave_file_translation(filename:str):
         assert f.getnchannels() == 1, f.getnchannels()
         assert f.getsampwidth() == 2, f.getsampwidth()
         num_samples = f.getnframes()
-        samples = f.readframes(num_samples)
-        samples_int16 = np.frombuffer(samples, dtype=np.int16)
-        samples_float32 = samples_int16.astype(np.float32)
-        samples_float32 = samples_float32 /32768
-        recognizer.accept_waveform(recognizer.sample_rate, samples_float32)
-        tail_paddings = np.zeros(
-            int(recognizer.sample_rate * 0.5), dtype=np.float32
-        )
-        recognizer.accept_waveform(recognizer.sample_rate, tail_paddings)
+        samples_per_read = int(1 * f.getframerate())  # 1 second = 1000 ms
+        this_sample = 0
+        result = ""
+        while(this_sample < num_samples):
+            samples = f.readframes(samples_per_read)
+            this_sample += samples_per_read
+            samples_int16 = np.frombuffer(samples, dtype=np.int16)
+            samples_float32 = samples_int16.astype(np.float32)
+            samples_float32 = samples_float32 /32768
+            recognizer.accept_waveform(recognizer.sample_rate, samples_float32)
+            tail_paddings = np.zeros(
+                int(recognizer.sample_rate * 0.5), dtype=np.float32
+            )
+            recognizer.accept_waveform(recognizer.sample_rate, tail_paddings)
+            if result != recognizer.text:
+                sys.stdout.write(recognizer.text[len(result):])
+                sys.stdout.flush()
+                result = recognizer.text
+
         recognizer.input_finished()
-        print(recognizer.text)
+        with open(filename[:-3]+'txt', 'w') as f:
+            f.write(recognizer.text)
+        # print(recognizer.text)
 
 def Extract_video_audio(video_path, audio_path):
     if Path(audio_path).is_file():
