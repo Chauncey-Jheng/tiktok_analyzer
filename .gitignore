@@ -1,6 +1,10 @@
 .venv/
 openvino_notebooks/
 /*.mp4
+!test.mp4
 /*.flv
 /*.log
 /*.json
+/*.wav
+!test.wav
+!test_format.wav
