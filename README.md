@@ -18,10 +18,17 @@
 - model [csukuangfj/sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13 (Bilingual, Chinese + English)](https://k2-fsa.github.io/sherpa/ncnn/pretrained_models/zipformer-transucer-models.html#csukuangfj-sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13-bilingual-chinese-english)
   
   ```
-  git clone https://huggingface.co/marcoyang/sherpa-ncnn-streaming-zipformer-zh-14M-2023-02-23
+  git clone https://huggingface.co/marcoyang/sherpa-ncnn-streaming-zipformer-zh-14M-2023-02-23  
   cd sherpa-ncnn-streaming-zipformer-zh-14M-2023-02-23
   git lfs pull --include "*.bin"
   ```
+
+  ```
+  git clone https://huggingface.co/csukuangfj/sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13
+  cd sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13
+  git lfs pull --include "*.bin"
+  ```
+
 
 **视频实时OCR**
 

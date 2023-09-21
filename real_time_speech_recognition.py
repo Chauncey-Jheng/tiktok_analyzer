@@ -116,7 +116,7 @@ if __name__ == "__main__":
     with wave.open(audio_file_path) as f:
         if f.getframerate != 16000:
             format_audio(audio_file_path, format_audio_path)
-
+    # wave_file_translation(format_audio_path)
     try:
         # real_time_speak_translation()
         wave_file_translation(format_audio_path)
