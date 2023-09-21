@@ -31,5 +31,9 @@
 
 
 **视频实时OCR**
-
 - 采用paddlepaddle openvino的预训练模型，直接在本地进行部署使用。
+
+**直播弹幕评论、礼物、商品信息获取**
+- 采用protobuf，对websocket连接中的数据流进行逆向解析。参考项目：https://github.com/YunzhiYike/douyin-live
+- 视频教程：[震撼！！！抖音直播间弹幕采集协议分析开源项目](https://www.bilibili.com/video/BV1FY4y1y7dp?p=4&vd_source=320e39fdb80686b4a73d909ce938d8e9)
+- 下载[protobuf](https://github.com/protocolbuffers/protobuf/releases/tag/v24.3)
