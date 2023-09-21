@@ -379,7 +379,7 @@ def run_paddle_ocr(source=0, flip=False, use_popup=False, skip_first_frames=0):
                 font_path=str(font_path)
             )
             # Record the ocr txt result
-            with open("ocr_result.txt","w") as f:
+            with open("ocr_result.txt","a+") as f:
                 for i in txts:
                     f.write(i+" ")
 

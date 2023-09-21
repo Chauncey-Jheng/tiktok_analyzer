@@ -6,6 +6,11 @@ openvino_notebooks/
 /*.log
 /*.json
 !result.json
+!liveShopping.json
+!ProductChange.json
+!LikeMessage.json
+!MemberMessage.json
+!ChatMessage.json
 /*.wav
 !test.wav
 !test_format.wav
