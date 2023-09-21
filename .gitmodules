@@ -1,0 +1,7 @@
+[submodule "sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13"]
+	path = sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13
+	url = https://huggingface.co/csukuangfj/sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13
+
+[submodule "sherpa-ncnn-streaming-zipformer-zh-14M-2023-02-23"]
+	path = sherpa-ncnn-streaming-zipformer-zh-14M-2023-02-23
+	url = https://huggingface.co/marcoyang/sherpa-ncnn-streaming-zipformer-zh-14M-2023-02-23
