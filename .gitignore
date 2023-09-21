@@ -11,3 +11,4 @@ openvino_notebooks/
 !test_format.wav
 /*.txt
 !test_format.txt
+!ocr_result.txt

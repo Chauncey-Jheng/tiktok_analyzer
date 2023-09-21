@@ -18,7 +18,7 @@ utils_file_path = Path('./paddle-ocr-webcam/utils/notebook_utils.py')
 ocr_directory_path = Path('./paddle-ocr-webcam/')
 sys.path.append(str(utils_file_path.parent))
 sys.path.append(str(ocr_directory_path))
-import notebook_utils as utils
+import notebook_utils as nb_utils
 import pre_post_processing as processing
 
 # ### Select inference device [$\Uparrow$](#Table-of-content:)
@@ -57,7 +57,7 @@ def run_model_download(model_url: str, model_file_path: Path) -> None:
         print("Downloading the pre-trained model... May take a while...")
 
         # Create a directory.
-        utils.download_file(model_url, archive_path.name, archive_path.parent)
+        nb_utils.download_file(model_url, archive_path.name, archive_path.parent)
         print("Model Downloaded")
 
         file = tarfile.open(archive_path)
@@ -266,14 +266,23 @@ def post_processing_detection(frame, det_results):
 # 4. Visualize the results.
 
 # Download font and a character dictionary for printing OCR results.
-font_path = utils.download_file(
-    url='https://raw.githubusercontent.com/Halfish/lstm-ctc-ocr/master/fonts/simfang.ttf',
-    directory='paddle-ocr-webcam/fonts'
-)
-character_dictionary_path = utils.download_file(
-    url='https://raw.githubusercontent.com/WenmuZhou/PytorchOCR/master/torchocr/datasets/alphabets/ppocr_keys_v1.txt',
-    directory='paddle-ocr-webcam/fonts'
-)
+if Path("paddle-ocr-webcam/fonts/simfang.ttf").is_file():
+    font_path=Path("paddle-ocr-webcam/fonts/simfang.ttf").resolve()
+    print("Font already exists")
+else:
+    font_path = nb_utils.download_file(
+        url='https://raw.githubusercontent.com/Halfish/lstm-ctc-ocr/master/fonts/simfang.ttf',
+        directory='paddle-ocr-webcam/fonts'
+    )
+
+if Path("paddle-ocr-webcam/fonts/ppocr_keys_v1.txt").is_file():
+    character_dictionary_path=Path("paddle-ocr-webcam/fonts/ppocr_keys_v1.txt").resolve()
+    print("character dictionary already exists")
+else:
+    character_dictionary_path = nb_utils.download_file(
+        url='https://raw.githubusercontent.com/WenmuZhou/PytorchOCR/master/torchocr/datasets/alphabets/ppocr_keys_v1.txt',
+        directory='paddle-ocr-webcam/fonts'
+    )
 
 def run_paddle_ocr(source=0, flip=False, use_popup=False, skip_first_frames=0):
     """
@@ -292,7 +301,7 @@ def run_paddle_ocr(source=0, flip=False, use_popup=False, skip_first_frames=0):
     # Create a video player to play with target fps.
     player = None
     try:
-        player = utils.VideoPlayer(source=source, flip=flip, fps=30, skip_first_frames=skip_first_frames)
+        player = nb_utils.VideoPlayer(source=source, flip=flip, fps=30, skip_first_frames=skip_first_frames)
         # Start video capturing.
         player.start()
         if use_popup:
@@ -369,6 +378,10 @@ def run_paddle_ocr(source=0, flip=False, use_popup=False, skip_first_frames=0):
                 drop_score=0.5,
                 font_path=str(font_path)
             )
+            # Record the ocr txt result
+            with open("ocr_result.txt","w") as f:
+                for i in txts:
+                    f.write(i+" ")
 
             # Visualize the PaddleOCR results.
             f_height, f_width = draw_img.shape[:2]
