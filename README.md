@@ -3,6 +3,7 @@
 **短视频下载**
 
 - 对于短视频，通过[Douyin_Tiktok_Download_API](https://github.com/Evil0ctal/Douyin_TikTok_Download_API)，可以从视频分享链接中获取视频下载url。
+  - 注意，需要安装node.js环境，否则可能会产生报错信息。
 
 **直播下载**
 
@@ -14,7 +15,7 @@
 
 **语音转文字**
 
-- 采用sherpa-ncnn的预训练模型，直接在本地进行部署使用。参考链接：https://k2-fsa.github.io/sherpa/ncnn/python/index.html#recognize-a-file
+- 采用sherpa-ncnn的预训练模型，直接在本地进行部署使用。将视频中的音频进行提取，通过模型实时将语音转为文字。支持中英文双语。参考链接：https://k2-fsa.github.io/sherpa/ncnn/python/index.html#recognize-a-file
 - model [csukuangfj/sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13 (Bilingual, Chinese + English)](https://k2-fsa.github.io/sherpa/ncnn/pretrained_models/zipformer-transucer-models.html#csukuangfj-sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13-bilingual-chinese-english)
   
   ```
@@ -31,9 +32,9 @@
 
 
 **视频实时OCR**
-- 采用paddlepaddle openvino的预训练模型，直接在本地进行部署使用。
+- 采用paddlepaddle openvino的预训练模型，直接在本地进行部署使用，可以对视频进行实时抓帧，文字检测定位以及OCR。
 
 **直播弹幕评论、礼物、商品信息获取**
-- 采用protobuf，对websocket连接中的数据流进行逆向解析。参考项目：https://github.com/YunzhiYike/douyin-live
+- 采用protobuf（谷歌提出的一种通信协议），建立websocket连接，对连接中的数据包进行抓取并逆向解析。参考项目：https://github.com/YunzhiYike/douyin-live
 - 视频教程：[震撼！！！抖音直播间弹幕采集协议分析开源项目](https://www.bilibili.com/video/BV1FY4y1y7dp?p=4&vd_source=320e39fdb80686b4a73d909ce938d8e9)
 - 下载[protobuf](https://github.com/protocolbuffers/protobuf/releases/tag/v24.3)
