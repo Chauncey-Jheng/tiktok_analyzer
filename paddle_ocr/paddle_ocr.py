@@ -14,11 +14,11 @@ from IPython import display
 import copy
 
 # Import local modules
-utils_file_path = Path('./paddle-ocr-webcam/utils/notebook_utils.py')
-ocr_directory_path = Path('./paddle-ocr-webcam/')
+utils_file_path = Path('./paddle_ocr/utils/notebook_utils.py')
+ocr_directory_path = Path('./paddle_ocr/')
 sys.path.append(str(utils_file_path.parent))
 sys.path.append(str(ocr_directory_path))
-import notebook_utils as nb_utils
+from utils import notebook_utils as nb_utils
 import pre_post_processing as processing
 
 # ### Select inference device [$\Uparrow$](#Table-of-content:)
@@ -72,7 +72,7 @@ def run_model_download(model_url: str, model_file_path: Path) -> None:
 # A directory where the model will be downloaded.
 
 det_model_url = "https://storage.openvinotoolkit.org/repositories/openvino_notebooks/models/paddle-ocr/ch_PP-OCRv3_det_infer.tar"
-det_model_file_path = Path("paddle-ocr-webcam/model/ch_PP-OCRv3_det_infer/inference.pdmodel")
+det_model_file_path = Path("paddle_ocr/model/ch_PP-OCRv3_det_infer/inference.pdmodel")
 
 run_model_download(det_model_url, det_model_file_path)
 # #### Load the Model for Text **Detection** [$\Uparrow$](#Table-of-content:)
@@ -88,7 +88,7 @@ det_output_layer = det_compiled_model.output(0)
 
 # #### Download the Model for Text **Recognition** [$\Uparrow$](#Table-of-content:)
 rec_model_url = "https://storage.openvinotoolkit.org/repositories/openvino_notebooks/models/paddle-ocr/ch_PP-OCRv3_rec_infer.tar"
-rec_model_file_path = Path("paddle-ocr-webcam/model/ch_PP-OCRv3_rec_infer/inference.pdmodel")
+rec_model_file_path = Path("paddle_ocr/model/ch_PP-OCRv3_rec_infer/inference.pdmodel")
 
 run_model_download(rec_model_url, rec_model_file_path)
 
@@ -266,22 +266,22 @@ def post_processing_detection(frame, det_results):
 # 4. Visualize the results.
 
 # Download font and a character dictionary for printing OCR results.
-if Path("paddle-ocr-webcam/fonts/simfang.ttf").is_file():
-    font_path=Path("paddle-ocr-webcam/fonts/simfang.ttf").resolve()
+if Path("paddle_ocr/fonts/simfang.ttf").is_file():
+    font_path=Path("paddle_ocr/fonts/simfang.ttf").resolve()
     print("Font already exists")
 else:
     font_path = nb_utils.download_file(
         url='https://raw.githubusercontent.com/Halfish/lstm-ctc-ocr/master/fonts/simfang.ttf',
-        directory='paddle-ocr-webcam/fonts'
+        directory='paddle_ocr/fonts'
     )
 
-if Path("paddle-ocr-webcam/fonts/ppocr_keys_v1.txt").is_file():
-    character_dictionary_path=Path("paddle-ocr-webcam/fonts/ppocr_keys_v1.txt").resolve()
+if Path("paddle_ocr/fonts/ppocr_keys_v1.txt").is_file():
+    character_dictionary_path=Path("paddle_ocr/fonts/ppocr_keys_v1.txt").resolve()
     print("character dictionary already exists")
 else:
     character_dictionary_path = nb_utils.download_file(
         url='https://raw.githubusercontent.com/WenmuZhou/PytorchOCR/master/torchocr/datasets/alphabets/ppocr_keys_v1.txt',
-        directory='paddle-ocr-webcam/fonts'
+        directory='paddle_ocr/fonts'
     )
 
 def run_paddle_ocr(source=0, flip=False, use_popup=False, skip_first_frames=0):
@@ -379,7 +379,7 @@ def run_paddle_ocr(source=0, flip=False, use_popup=False, skip_first_frames=0):
                 font_path=str(font_path)
             )
             # Record the ocr txt result
-            with open("ocr_result.txt","a+") as f:
+            with open(source[:-4]+"_ocr.txt","w") as f:
                 for i in txts:
                     f.write(i+" ")
 
@@ -426,10 +426,10 @@ if __name__ == "__main__":
     # ## Run Live PaddleOCR with OpenVINO [$\Uparrow$](#Table-of-content:)
     # Use a webcam as the video input. By default, the primary webcam is set with `source=0`. If you have multiple webcams, each one will be assigned a consecutive number starting at 0. Set `flip=True` when using a front-facing camera. Some web browsers, especially Mozilla Firefox, may cause flickering. If you experience flickering, set `use_popup=True`. 
     # Run live PaddleOCR:
-    # run_paddle_ocr(source=0, flip=False, use_popup=False)
+    run_paddle_ocr(source=0, flip=False, use_popup=True)
 
     # Test OCR results on a video file.
-    video_file = "C:/Users/ZCX/workplace/test_douyin/test.mp4"
-    run_paddle_ocr(source=video_file, flip=False, use_popup=True, skip_first_frames=0)
+    # video_file = "C:/Users/ZCX/workplace/test_douyin/test.mp4"
+    # run_paddle_ocr(source=video_file, flip=False, use_popup=True, skip_first_frames=0)
 
 
