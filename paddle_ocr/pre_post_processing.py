@@ -289,7 +289,7 @@ def get_rotate_crop_image(img, points):
 postprocess_params = {
             'name': 'CTCLabelDecode',
             "character_type": "ch",
-            "character_dict_path": "./paddle-ocr-webcam/fonts/ppocr_keys_v1.txt",
+            "character_dict_path": "./paddle_ocr/fonts/ppocr_keys_v1.txt",
             "use_space_char": True
         }
 
@@ -418,7 +418,7 @@ def draw_ocr_box_txt(image,
                      txts,
                      scores=None,
                      drop_score=0.5,
-                     font_path='.paddle-ocr-webcam/fonts/simfang.ttf'):
+                     font_path='.paddle_ocr/fonts/simfang.ttf'):
     h, w = image.height, image.width
     img_left = image.copy()
     img_right = Image.new('RGB', (w, h), (255, 255, 255))

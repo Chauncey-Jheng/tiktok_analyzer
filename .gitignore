@@ -17,3 +17,7 @@ openvino_notebooks/
 /*.txt
 !test_format.txt
 !ocr_result.txt
+live_download_cache/*
+sensitive_video_part/*
+integrated_video/*
+test.py
