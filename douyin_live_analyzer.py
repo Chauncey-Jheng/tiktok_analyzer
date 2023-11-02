@@ -31,19 +31,6 @@ def video_analyse(video_file, sensitive_video_dir, use_popup, sensitive_word):
         sensitive_video_queue.append(int(video_file[-8:-4]))
         print("保存视频证据成功！")
 
-def concat_video(input_files, output_file_dir):
-    for i in input_files:
-        subprocess.run(f"ffmpeg -i {i} {i[:-3]}ts")
-    time_stamp = time.strftime('%Y_%m_%d_%H_%M_%S',time.localtime(int(round(time.time()*1000))/1000))
-    output_file = output_file_dir + time_stamp +'.ts'
-    i_argument = 'concat:' + '|'.join(input_files)
-    ffmpeg_cmd = f'ffmpeg -i "{i_argument}" -c copy "{output_file}"'
-    try:
-        subprocess.run(ffmpeg_cmd)
-        print(f'Concatenated FLV files to {output_file}')
-        subprocess.run(f"ffmpeg -i {output_file} {output_file[:-2]}flv")
-    except subprocess.CalledProcessError as e:
-        print(f'Error: {e}')
 
 def intergrate_video(x, video_path, fragment_num, left_fragments, right_fragments, fragment_time, integrated_video_dir):
     input_files = []
@@ -53,14 +40,25 @@ def intergrate_video(x, video_path, fragment_num, left_fragments, right_fragment
         else:
             input_files.append(video_path + (4-len(str(x)))*"0" + str(x - i) + ".flv")
     input_files.reverse()
-    concat_video(input_files, integrated_video_dir)
     for i in range(1, right_fragments):
         time.sleep(fragment_time)
         if i > fragment_num - x:
             input_files.append(video_path + (4-len(str(x)))*"0" + str(i + x -fragment_num) + ".flv")
         else:
             input_files.append(video_path + (4-len(str(x)))*"0" + str(i + x) + ".flv")
-    concat_video(input_files, integrated_video_dir)
+    
+    for i in input_files:
+        subprocess.run(f"ffmpeg -i {i} {i[:-3]}ts -y")
+    time_stamp = time.strftime('%Y_%m_%d_%H_%M_%S',time.localtime(int(round(time.time()*1000))/1000))
+    output_file = integrated_video_dir + time_stamp +'.ts'
+    i_argument = 'concat:' + '|'.join(input_files)
+    ffmpeg_cmd = f'ffmpeg -i "{i_argument}" -c copy "{output_file}"'
+    try:
+        subprocess.run(ffmpeg_cmd)
+        print(f'Concatenated FLV files to {output_file}')
+        subprocess.run(f"ffmpeg -i {output_file} {output_file[:-2]}flv")
+    except subprocess.CalledProcessError as e:
+        print(f'Error: {e}')
 
 if __name__ == "__main__":
     print("请输入抖音直播链接：")
