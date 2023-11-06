@@ -1,5 +1,7 @@
 # 爬取抖音短视频及直播数据
 
+## 技术路径
+
 **短视频下载**
 
 - 对于短视频，通过[Douyin_Tiktok_Download_API](https://github.com/Evil0ctal/Douyin_TikTok_Download_API)，可以从视频分享链接中获取视频下载url。
