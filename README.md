@@ -14,7 +14,7 @@
   - 安装jdk11.0.20
 
 **语音转文字**
-
+- 本项目采用的模型经过内部数据训练，由于模型较大无法上传至github。可以采用如下其他的双语预训练模型替代。
 - 采用sherpa-ncnn的预训练模型，直接在本地进行部署使用。将视频中的音频进行提取，通过模型实时将语音转为文字。参考链接：https://k2-fsa.github.io/sherpa/ncnn/python/index.html#recognize-a-file
 - model [csukuangfj/sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13 (Bilingual, Chinese + English)](https://k2-fsa.github.io/sherpa/ncnn/pretrained_models/zipformer-transucer-models.html#csukuangfj-sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13-bilingual-chinese-english)
   
