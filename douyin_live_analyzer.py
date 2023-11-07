@@ -67,6 +67,7 @@ def intergrate_video(x, video_path, fragment_num, left_fragments, right_fragment
         subprocess.run(ffmpeg_cmd)
         print(f'Concatenated FLV files to {output_file}')
         subprocess.run(f"ffmpeg -i {output_file} {output_file[:-2]}flv")
+        os.remove(output_file)
     except subprocess.CalledProcessError as e:
         print(f'Error: {e}')
 
