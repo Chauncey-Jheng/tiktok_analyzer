@@ -7,10 +7,10 @@ openvino_notebooks/
 /*.wav
 /*.txt
 !/requirements.txt
-live_download_cache/*
-!live_download_cache/readme.txt
-sensitive_video_part/*
-!sensitive_video_part/readme.txt
-integrated_video/*
-!integrated_video/readme.txt
+static/video/live_download_cache/*
+!static/video/live_download_cache/readme.txt
+static/video/sensitive_video_part/*
+!static/video/sensitive_video_part/readme.txt
+static/video/integrated_video/*
+!static/video/integrated_video/readme.txt
 /test.py

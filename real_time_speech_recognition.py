@@ -11,10 +11,11 @@ except ImportError as e:
     sys.exit(-1)
 
 import sherpa_ncnn
-import ffmpeg
+# import ffmpeg
 from pathlib import Path
 import wave
 import numpy as np
+import subprocess
 
 def create_recognizer():
     # Please replace the model files if needed.
@@ -100,7 +101,9 @@ def Extract_video_audio(video_path, audio_path):
         desired_sample_rate = 16000
         desired_bit_depth = 16
         desired_channels = 1
-        ffmpeg.input(video_path).output(audio_path,ac=desired_channels,ar=desired_sample_rate,bits_per_raw_sample=desired_bit_depth).run()
+        ffmpeg_cmd = f"ffmpeg -y -i {video_path} -ac {desired_channels} -ar {desired_sample_rate} -sample_fmt s{desired_bit_depth} {audio_path}"
+        subprocess.run(ffmpeg_cmd)
+        # ffmpeg.input(video_path).output(audio_path,ac=desired_channels,ar=desired_sample_rate,bits_per_raw_sample=desired_bit_depth).run()
 
 def video_speech_recognition(video_file_path):
     audio_file_path = video_file_path[:-3] + "wav"
