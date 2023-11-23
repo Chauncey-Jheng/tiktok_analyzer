@@ -4,45 +4,6 @@ from selenium.webdriver.common.by import By
 from browsermobproxy import Server
 import requests
 
-def test_eight_components():
-    driver = webdriver.Chrome()
-
-    driver.get("https://www.selenium.dev/selenium/web/web-form.html")
-
-    title = driver.title
-    assert title == "Web form"
-
-    driver.implicitly_wait(0.5)
-
-    text_box = driver.find_element(by=By.NAME, value="my-text")
-    submit_button = driver.find_element(by=By.CSS_SELECTOR, value="button")
-
-    text_box.send_keys("Selenium")
-    submit_button.click()
-
-    message = driver.find_element(by=By.ID, value="message")
-    value= message.text
-    assert value == "Received!"
-
-    driver.quit()
-
-def test_network():
-    option = webdriver.ChromeOptions()
- 
-    # 开启开发者工具（F12）
-
-    option.add_argument("--auto-open-devtools-for-tabs")
-    
-    driver = webdriver.Chrome(options=option)
-
-    driver.get("https://live.douyin.com/956767438545")
-
-    print("I'm here!")
-    input()
-
-    driver.quit()
-
-
 def download_live_stream(url:str, video_name:str):
     server = Server("browsermob-proxy-2.1.4-bin\\browsermob-proxy-2.1.4\\bin\\browsermob-proxy")
     server.start()
