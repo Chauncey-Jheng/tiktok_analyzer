@@ -57,7 +57,10 @@ def get_live_stream_download_url(live_url:str) -> list:
         if "stream-" in _url:
             print(_url)
             url_list.append(_url)
-    print("Live urls have been got.")
+    if len(url_list) != 0:
+        print("Live urls have been got.")
+    else:
+        print("Live url fetching failed.")
     driver.quit()
     print("Driver has quited.")
     server.stop()

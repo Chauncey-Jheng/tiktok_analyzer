@@ -14,10 +14,10 @@ import json
 def get_live_fragment(url_list, video_path, cache_time, fragment_time):
     douyin_live_scraper.download_live_stream_fragment(url_list=url_list, video_path=video_path, cache_time=cache_time, fragment_time=fragment_time)
 
-def video_analyse(video_file, sensitive_video_dir, use_popup, sensitive_word, sensitive_video_queue, live_info_dict):
-    subprocess.run(f"ffmpeg -y -i {video_file} {video_file[:-3]}mp4")
+def video_analyse(video_file, sensitive_video_dir, sensitive_word, sensitive_video_queue, live_info_dict):
+    subprocess.run(f"ffmpeg -y -i {video_file} {video_file[:-3]}mp4", stdout=subprocess.DEVNULL)
     real_time_speech_recognition.video_speech_recognition(video_file_path=video_file)
-    paddle_ocr.run_paddle_ocr(source=video_file, flip=False, use_popup=use_popup, skip_first_frames=0)
+    paddle_ocr.run_paddle_ocr(source=video_file, flip=False, skip_first_frames=0)
     video_asr_result_file = video_file[:-4] + "_asr.txt"
     video_ocr_result_file = video_file[:-4] + "_ocr.txt"
     result_txt = ""
@@ -25,7 +25,8 @@ def video_analyse(video_file, sensitive_video_dir, use_popup, sensitive_word, se
         result_txt += f.read()
     with open(video_ocr_result_file,"r") as f:
         result_txt += f.read()
-    if sensitive_word in result_txt:
+    word = sensitive_match(result_txt)
+    if word != None:
         print("检测到敏感词，正在保存视频证据...")
         ## copy current file to another dir
         shutil.copy(video_file, sensitive_video_dir)
@@ -39,6 +40,13 @@ def video_analyse(video_file, sensitive_video_dir, use_popup, sensitive_word, se
     live_info_dict["video_file_path"] = video_file[:-3]+"mp4"
     live_info_dict["asr_file_path"] = video_asr_result_file
     live_info_dict["ocr_file_path"] = video_ocr_result_file
+
+def sensitive_match(txt:str) -> str:
+    sensitive_word = []
+    for i in sensitive_word:
+        if i in txt:
+            return i
+    return None
 
 def intergrate_video(x, video_path, fragment_num, left_fragments, right_fragments, fragment_time, integrated_video_dir):
     input_files = []
@@ -175,7 +183,7 @@ if __name__ == "__main__":
     iter_num = 0
     while(True):
         video_file = video_path + (4-len(str(iter_num)))*"0" + str(iter_num) + ".flv"
-        p_analyse = Process(target=video_analyse, args=(video_file, sensitive_video_dir, False, sensitive_word, sensitive_video_queue, live_info_dict))
+        p_analyse = Process(target=video_analyse, args=(video_file, sensitive_video_dir, sensitive_word, sensitive_video_queue, live_info_dict))
         p_analyse.start()
         time.sleep(fragment_time)
 

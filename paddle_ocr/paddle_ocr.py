@@ -3,14 +3,10 @@ import cv2
 import numpy as np
 import paddle
 import math
-import time
 import collections
-from PIL import Image
 from pathlib import Path
-import tarfile
 
 import openvino as ov
-from IPython import display
 import copy
 
 # Import local modules
@@ -21,76 +17,21 @@ sys.path.append(str(ocr_directory_path))
 from utils import notebook_utils as nb_utils
 import pre_post_processing as processing
 
-# ### Select inference device [$\Uparrow$](#Table-of-content:)
-# select device from dropdown list for running inference using OpenVINO
-
-import ipywidgets as widgets
-core = ov.Core()
-device = widgets.Dropdown(
-    options=core.available_devices + ["AUTO"],
-    value='AUTO',
-    description='Device:',
-    disabled=False,
-)
-
-device
-
-# ### Models for PaddleOCR [$\Uparrow$](#Table-of-content:)
-# PaddleOCR includes two parts of deep learning models, text detection and text recognition. Pre-trained models used in the demo are downloaded and stored in the "model" folder.
-# Only a few lines of code are required to run the model. First, initialize the runtime for inference. Then, read the network architecture and model weights from the `.pdmodel` and `.pdiparams` files to load to CPU/GPU.
-
-# Define the function to download text detection and recognition models from PaddleOCR resources.
-
-def run_model_download(model_url: str, model_file_path: Path) -> None:
-    """
-    Download pre-trained models from PaddleOCR resources
-
-    Parameters:
-        model_url: url link to pre-trained models
-        model_file_path: file path to store the downloaded model
-    """
-    archive_path = model_file_path.absolute().parent.parent / model_url.split("/")[-1]
-    if model_file_path.is_file(): 
-        print("Model already exists")
-    else:
-        # Download the model from the server, and untar it.
-        print("Downloading the pre-trained model... May take a while...")
-
-        # Create a directory.
-        nb_utils.download_file(model_url, archive_path.name, archive_path.parent)
-        print("Model Downloaded")
-
-        file = tarfile.open(archive_path)
-        res = file.extractall(archive_path.parent)
-        file.close()
-        if not res:
-            print(f"Model Extracted to {model_file_path}.")
-        else:
-            print("Error Extracting the model. Please check the network.")
-
-
-# A directory where the model will be downloaded.
-
-det_model_url = "https://storage.openvinotoolkit.org/repositories/openvino_notebooks/models/paddle-ocr/ch_PP-OCRv3_det_infer.tar"
 det_model_file_path = Path("paddle_ocr/model/ch_PP-OCRv3_det_infer/inference.pdmodel")
 
-run_model_download(det_model_url, det_model_file_path)
 # #### Load the Model for Text **Detection** [$\Uparrow$](#Table-of-content:)
 
 # Initialize OpenVINO Runtime for text detection.
 core = ov.Core()
 det_model = core.read_model(model=det_model_file_path)
-det_compiled_model = core.compile_model(model=det_model, device_name=device.value)
+det_compiled_model = core.compile_model(model=det_model)
 
 # Get input and output nodes for text detection.
 det_input_layer = det_compiled_model.input(0)
 det_output_layer = det_compiled_model.output(0)
 
 # #### Download the Model for Text **Recognition** [$\Uparrow$](#Table-of-content:)
-rec_model_url = "https://storage.openvinotoolkit.org/repositories/openvino_notebooks/models/paddle-ocr/ch_PP-OCRv3_rec_infer.tar"
 rec_model_file_path = Path("paddle_ocr/model/ch_PP-OCRv3_rec_infer/inference.pdmodel")
-
-run_model_download(rec_model_url, rec_model_file_path)
 
 # #### Load the Model for Text **Recognition** with Dynamic Shape [$\Uparrow$](#Table-of-content:)
 # Input to text recognition model refers to detected bounding boxes with different image sizes, for example, dynamic input shapes. Hence:
@@ -263,28 +204,9 @@ def post_processing_detection(frame, det_results):
 # 1. Create a video player to play with target fps (`utils.VideoPlayer`).
 # 2. Prepare a set of frames for text detection and recognition.
 # 3. Run AI inference for both text detection and recognition.
-# 4. Visualize the results.
 
-# Download font and a character dictionary for printing OCR results.
-if Path("paddle_ocr/fonts/simfang.ttf").is_file():
-    font_path=Path("paddle_ocr/fonts/simfang.ttf").resolve()
-    print("Font already exists")
-else:
-    font_path = nb_utils.download_file(
-        url='https://raw.githubusercontent.com/Halfish/lstm-ctc-ocr/master/fonts/simfang.ttf',
-        directory='paddle_ocr/fonts'
-    )
 
-if Path("paddle_ocr/fonts/ppocr_keys_v1.txt").is_file():
-    character_dictionary_path=Path("paddle_ocr/fonts/ppocr_keys_v1.txt").resolve()
-    print("character dictionary already exists")
-else:
-    character_dictionary_path = nb_utils.download_file(
-        url='https://raw.githubusercontent.com/WenmuZhou/PytorchOCR/master/torchocr/datasets/alphabets/ppocr_keys_v1.txt',
-        directory='paddle_ocr/fonts'
-    )
-
-def run_paddle_ocr(source=0, flip=False, use_popup=False, skip_first_frames=0):
+def run_paddle_ocr(source=0, flip=False, skip_first_frames=0):
     """
     Main function to run the paddleOCR inference:
     1. Create a video player to play with target fps (utils.VideoPlayer).
@@ -304,9 +226,6 @@ def run_paddle_ocr(source=0, flip=False, use_popup=False, skip_first_frames=0):
         player = nb_utils.VideoPlayer(source=source, flip=flip, fps=30, skip_first_frames=skip_first_frames)
         # Start video capturing.
         player.start()
-        if use_popup:
-            title = "Press ESC to Exit"
-            cv2.namedWindow(winname=title, flags=cv2.WINDOW_GUI_NORMAL | cv2.WINDOW_AUTOSIZE)
 
         processing_times = collections.deque()
         while True:
@@ -323,20 +242,15 @@ def run_paddle_ocr(source=0, flip=False, use_popup=False, skip_first_frames=0):
             # Preprocess the image for text detection.
             test_image = image_preprocess(frame, 640)
                 
-            # Measure processing time for text detection.
-            start_time = time.time()
             # Perform the inference step.
             det_results = det_compiled_model([test_image])[det_output_layer]
-            stop_time = time.time()
 
             # Postprocessing for Paddle Detection.
             dt_boxes = post_processing_detection(frame, det_results)
 
-            processing_times.append(stop_time - start_time)
             # Use processing times from last 200 frames.
             if len(processing_times) > 200:
                 processing_times.popleft()
-            processing_time_det = np.mean(processing_times) * 1000
 
             # Preprocess detection results for recognition.
             dt_boxes = processing.sorted_boxes(dt_boxes)  
@@ -347,7 +261,6 @@ def run_paddle_ocr(source=0, flip=False, use_popup=False, skip_first_frames=0):
             # txts are the recognized text results, scores are the recognition confidence level. 
             rec_res = [['', 0.0]] * img_num
             txts = [] 
-            scores = []
 
             for beg_img_no in range(0, img_num, batch_num):
 
@@ -365,49 +278,11 @@ def run_paddle_ocr(source=0, flip=False, use_popup=False, skip_first_frames=0):
                     rec_res[indices[beg_img_no + rno]] = rec_result[rno]   
                 if rec_res:
                     txts = [rec_res[i][0] for i in range(len(rec_res))] 
-                    scores = [rec_res[i][1] for i in range(len(rec_res))]
-                                   
-            image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            boxes = dt_boxes
-            # Draw text recognition results beside the image.
-            draw_img = processing.draw_ocr_box_txt(
-                image,
-                boxes,
-                txts,
-                scores,
-                drop_score=0.5,
-                font_path=str(font_path)
-            )
+
             # Record the ocr txt result
             with open(source[:-4]+"_ocr.txt","w") as f:
                 for i in txts:
                     f.write(i+" ")
-
-            # Visualize the PaddleOCR results.
-            f_height, f_width = draw_img.shape[:2]
-            fps = 1000 / processing_time_det
-            cv2.putText(img=draw_img, text=f"Inference time: {processing_time_det:.1f}ms ({fps:.1f} FPS)", 
-                        org=(20, 40),fontFace=cv2.FONT_HERSHEY_COMPLEX, fontScale=f_width / 1000,
-                        color=(0, 0, 255), thickness=1, lineType=cv2.LINE_AA)
-            
-            # Use this workaround if there is flickering.
-            if use_popup: 
-                draw_img = cv2.cvtColor(draw_img, cv2.COLOR_RGB2BGR)
-                cv2.imshow(winname=title, mat=draw_img)
-                key = cv2.waitKey(1)
-                # escape = 27
-                if key == 27:
-                    break
-            else:
-                # Encode numpy array to jpg.
-                draw_img = cv2.cvtColor(draw_img, cv2.COLOR_RGB2BGR)
-                _, encoded_img = cv2.imencode(ext=".jpg", img=draw_img,
-                                              params=[cv2.IMWRITE_JPEG_QUALITY, 100])
-                # Create an IPython image.
-                i = display.Image(data=encoded_img)
-                # Display the image in this notebook.
-                display.clear_output(wait=True)
-                display.display(i)
             
     # ctrl-c
     except KeyboardInterrupt:
@@ -419,17 +294,8 @@ def run_paddle_ocr(source=0, flip=False, use_popup=False, skip_first_frames=0):
         if player is not None:
             # Stop capturing.
             player.stop()
-        if use_popup:
-            cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    # ## Run Live PaddleOCR with OpenVINO [$\Uparrow$](#Table-of-content:)
-    # Use a webcam as the video input. By default, the primary webcam is set with `source=0`. If you have multiple webcams, each one will be assigned a consecutive number starting at 0. Set `flip=True` when using a front-facing camera. Some web browsers, especially Mozilla Firefox, may cause flickering. If you experience flickering, set `use_popup=True`. 
-    # Run live PaddleOCR:
-    run_paddle_ocr(source=0, flip=False, use_popup=True)
-
-    # Test OCR results on a video file.
-    # video_file = "C:/Users/ZCX/workplace/test_douyin/test.mp4"
-    # run_paddle_ocr(source=video_file, flip=False, use_popup=True, skip_first_frames=0)
+    run_paddle_ocr(source=0, flip=False)
 
 

@@ -6,11 +6,9 @@ import math
 
 from PIL import Image, ImageDraw, ImageFont
 import copy
-import imghdr
 from shapely.geometry import Polygon
 import pyclipper
 import string
-from paddle.nn import functional as F
 
 def DetResizeForTest(data):
     img = data['image']
