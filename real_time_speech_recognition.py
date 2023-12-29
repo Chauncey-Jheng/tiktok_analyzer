@@ -1,14 +1,14 @@
 import sys
 
-try:
-    import sounddevice as sd
-except ImportError as e:
-    print("Please install sounddevice first. You can use")
-    print()
-    print("  pip install sounddevice")
-    print()
-    print("to install it")
-    sys.exit(-1)
+# try:
+#     import sounddevice as sd
+# except ImportError as e:
+#     print("Please install sounddevice first. You can use")
+#     print()
+#     print("  pip install sounddevice")
+#     print()
+#     print("to install it")
+#     sys.exit(-1)
 
 import sherpa_ncnn
 import wave
@@ -32,28 +32,28 @@ def create_recognizer():
     return recognizer
 
 
-def real_time_speak_translation():
-    devices = sd.query_devices()
-    print(devices)
-    default_input_device_idx = sd.default.device[0]
-    print(f'Use default device: {devices[default_input_device_idx]["name"]}')
+# def real_time_speak_translation():
+#     devices = sd.query_devices()
+#     print(devices)
+#     default_input_device_idx = sd.default.device[0]
+#     print(f'Use default device: {devices[default_input_device_idx]["name"]}')
 
-    print("Started! Please speak")
-    recognizer = create_recognizer()
-    sample_rate = recognizer.sample_rate
-    samples_per_read = int(0.1 * sample_rate)  # 0.1 second = 100 ms
-    last_result = ""
-    with sd.InputStream(
-        channels=1, dtype="float32", samplerate=sample_rate
-    ) as s:
-        while True:
-            samples, _ = s.read(samples_per_read)  # a blocking read
-            samples = samples.reshape(-1)
-            recognizer.accept_waveform(sample_rate, samples)
-            result = recognizer.text
-            if last_result != result:
-                last_result = result
-                print(result)
+#     print("Started! Please speak")
+#     recognizer = create_recognizer()
+#     sample_rate = recognizer.sample_rate
+#     samples_per_read = int(0.1 * sample_rate)  # 0.1 second = 100 ms
+#     last_result = ""
+#     with sd.InputStream(
+#         channels=1, dtype="float32", samplerate=sample_rate
+#     ) as s:
+#         while True:
+#             samples, _ = s.read(samples_per_read)  # a blocking read
+#             samples = samples.reshape(-1)
+#             recognizer.accept_waveform(sample_rate, samples)
+#             result = recognizer.text
+#             if last_result != result:
+#                 last_result = result
+#                 print(result)
 
 def wave_file_translation(filename:str):
     recognizer = create_recognizer()
@@ -93,7 +93,7 @@ def Extract_video_audio(video_path, audio_path):
     desired_sample_rate = 16000
     desired_bit_depth = 16
     desired_channels = 1
-    ffmpeg_cmd = f"ffmpeg -y {video_path} -ac {desired_channels} -ar {desired_sample_rate} -sample_fmt s{desired_bit_depth} {audio_path}"
+    ffmpeg_cmd = f"ffmpeg -i {video_path} -ac {desired_channels} -ar {desired_sample_rate} -sample_fmt s{desired_bit_depth} -y {audio_path}"
     subprocess.run(ffmpeg_cmd,stdout=subprocess.DEVNULL)
 
 def video_speech_recognition(video_file_path):
@@ -106,10 +106,11 @@ def video_speech_recognition(video_file_path):
 
 if __name__ == "__main__":
 
-    video_file_path = "live_test_dir\\test0.flv"
-    audio_file_path = "live_test_dir\\test0.wav"
-    Extract_video_audio(video_file_path, audio_file_path)
-    try:
-        wave_file_translation(audio_file_path)
-    except:
-        print("LOL, I'm break down.")
+    video_file_path = "static\\video\\live_download_cache\\yuyou12140000.flv"
+    audio_file_path = "static\\video\\live_download_cache\\yuyou12140000.wav"
+    # Extract_video_audio(video_file_path, audio_file_path)
+    # try:
+    #     wave_file_translation(audio_file_path)
+    # except:
+    #     print("LOL, I'm break down.")
+    wave_file_translation(audio_file_path)

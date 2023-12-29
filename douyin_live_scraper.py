@@ -1,4 +1,5 @@
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 
 from selenium.webdriver.common.by import By
 from browsermobproxy import Server
@@ -82,7 +83,7 @@ def download_live_stream_fragment(url_list:list, video_path:str, cache_time:int=
         with open(video_path + (4-len(str(iter_num)))*"0" + str(iter_num) + ".flv", 'wb') as f:    
             for chunk in res.iter_content(chunk_size=1024):
                 f.write(chunk)
-                if time.time() - start_time > 5:
+                if time.time() - start_time > fragment_time:
                     start_time = time.time()
                     break
         iter_num += 1

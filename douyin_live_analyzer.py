@@ -4,15 +4,15 @@ from paddle_ocr import paddle_ocr
 import time
 from multiprocessing import Process
 from multiprocessing import Queue
-import subprocess
 import shutil
+from dao import DAO
 import os
-
+dao = DAO()
 
 def get_live_fragment(url_list, video_path, cache_time, fragment_time):
     douyin_live_scraper.download_live_stream_fragment(url_list=url_list, video_path=video_path, cache_time=cache_time, fragment_time=fragment_time)
 
-def video_analyse(video_file, sensitive_video_dir, sensitive_video_queue):
+def video_analyse(video_file:str, sensitive_video_dir:str, sensitive_video_queue, live_url:str, live_name:str):
     real_time_speech_recognition.video_speech_recognition(video_file_path=video_file)
     paddle_ocr.run_paddle_ocr(source=video_file, flip=False, skip_first_frames=0)
     video_asr_result_file = video_file[:-4] + "_asr.txt"
@@ -23,25 +23,34 @@ def video_analyse(video_file, sensitive_video_dir, sensitive_video_queue):
     with open(video_ocr_result_file,"r") as f:
         result_txt += f.read()
     word = sensitive_match(result_txt)
+
     if word != None:
         print("匹配到敏感词，正在保存视频数据...")
         ## copy current file to another dir
         time_stamp = time.strftime('%Y_%m_%d_%H_%M_%S',time.localtime(int(round(time.time()*1000))/1000))
-        shutil.copy(video_file, sensitive_video_dir+"\\"+video_file[:-4]+time_stamp+video_file[-4:])
-        shutil.copy(video_asr_result_file, sensitive_video_dir+"\\"+video_asr_result_file[:-4]+time_stamp+video_asr_result_file[-4:])
-        shutil.copy(video_ocr_result_file, sensitive_video_dir+"\\"+video_ocr_result_file[:-4]+time_stamp+video_ocr_result_file[-4:])
+        save_video_file = sensitive_video_dir+"\\"+video_file.split("\\")[-1][:-4]+time_stamp+video_file[-4:]
+        save_asr_file = sensitive_video_dir+"\\"+video_asr_result_file.split("\\")[-1][:-4]+time_stamp+video_asr_result_file[-4:]
+        save_ocr_file = sensitive_video_dir+"\\"+video_ocr_result_file.split("\\")[-1][:-4]+time_stamp+video_ocr_result_file[-4:]
+        
+        shutil.copy(video_file, save_video_file)
+        shutil.copy(video_asr_result_file, save_asr_file)
+        shutil.copy(video_ocr_result_file, save_ocr_file)
         ## add video file number to global sensitive_video_queue
         # sensitive_video_queue.put(int(video_file[-8:-4]))
         # print("sensitive_video_queue in video_analyse function:", sensitive_video_queue.empty())
+        dao.insert_live(live_url,live_name,save_video_file,save_ocr_file,save_asr_file)
+        live_id = dao.get_live_id_max()[0][0]
+        敏感词_id = dao.get_通用敏感词id(word)[0][0]
+        dao.insert_通用敏感词匹配(str(live_id),str(敏感词_id))
         print("保存视频证据成功！")
 
 def sensitive_match(txt:str) -> str:
-    sensitive_word = ["最","维生素"]
-    for i in sensitive_word:
+    sensitive_words = dao.get_通用敏感词()
+    sensitive_words = [i[1] for i in sensitive_words]
+    for i in sensitive_words:
         if i in txt:
             return i
     return None
-
 
 # def intergrate_video(x, video_path, fragment_num, left_fragments, right_fragments, fragment_time, integrated_video_dir):
 #     input_files = []
@@ -83,15 +92,22 @@ def sensitive_match(txt:str) -> str:
 
 
 def main(live_url, live_name):
+    
+    # # 获取当前文件路径
+    # current_path = os.path.abspath(__file__)
+    # # 获取当前文件的父目录
+    # root_path = os.path.abspath(os.path.dirname(current_path) + os.path.sep + ".")
 
     video_path = "static\\video\\live_download_cache\\" + live_name
     sensitive_video_dir = "static\\video\\sensitive_video_part"
     # integrated_video_dir = "static\\video\\integrated_video"
-    url_list = douyin_live_scraper.get_live_stream_download_url(live_url)
+    url_list = []
+    while(len(url_list) == 0):
+        url_list = douyin_live_scraper.get_live_stream_download_url(live_url)
     sensitive_video_queue = Queue()
 
-    cache_time = 180 #所有缓存区片段的总时间
-    fragment_time = 5 #每个片段的时间
+    cache_time = 18000 #所有缓存区片段的总时间
+    fragment_time = 15 #每个片段的时间
     fragment_num = cache_time//fragment_time #缓冲区片段个数
 
     # left_fragments = 2 #当检测到敏感词时，保存的过往片段个数, 请注意，该数不能大于缓冲区片段个数！(包括敏感片段自身)
@@ -104,9 +120,12 @@ def main(live_url, live_name):
     iter_num = 0
 
     while(True):
+        if p_download.is_alive() == False:
+            print("Something wrong with the downloading process.")
+            break
         try:
             video_file = video_path + (4-len(str(iter_num)))*"0" + str(iter_num) + ".flv"
-            p_analyse = Process(target=video_analyse, args=(video_file, sensitive_video_dir, sensitive_video_queue))
+            p_analyse = Process(target=video_analyse, args=(video_file, sensitive_video_dir, sensitive_video_queue, live_url, live_name))
             p_analyse.start()
             time.sleep(fragment_time)
 
