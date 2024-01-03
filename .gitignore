@@ -6,6 +6,7 @@ openvino_notebooks/
 /*.json
 /*.wav
 /*.txt
+.env
 !/requirements.txt
 static/video/live_download_cache/*
 !static/video/live_download_cache/readme.txt

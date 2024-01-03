@@ -1,9 +1,13 @@
 # from text_analysis import SparkApi
 import SparkApi
+
+from dotenv import load_dotenv
+import os
+load_dotenv()
 #以下密钥信息从控制台获取
-appid = "a3e9bc44"     #填写控制台中获取的 APPID 信息
-api_secret = "ZGYwNzIwZjRlNDZjNDAyZmY1N2M4MmU1"   #填写控制台中获取的 APISecret 信息
-api_key ="5e375123d6bbb6f76794cc239c590110"    #填写控制台中获取的 APIKey 信息
+appid = os.getenv('APPID')     #填写控制台中获取的 APPID 信息
+api_secret = os.getenv('API_SECRET')   #填写控制台中获取的 APISecret 信息
+api_key = os.getenv('API_KEY')    #填写控制台中获取的 APIKey 信息
 
 #用于配置大模型版本，默认“general/generalv2”
 # domain = "general"   # v1.5版本
@@ -41,13 +45,14 @@ def checklen(text):
 
 
 if __name__ == '__main__':
-    text.clear
     while(1):
+        text.clear
         Input = input("\n" +"我:")
         question = checklen(getText("user",Input))
         SparkApi.answer =""
         print("星火:",end = "")
         SparkApi.main(appid,api_key,api_secret,Spark_url,domain,question)
+        print(SparkApi.answer)
         getText("assistant",SparkApi.answer)
         # print(str(text))
 
