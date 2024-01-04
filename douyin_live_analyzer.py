@@ -52,6 +52,17 @@ def sensitive_match(txt:str) -> str:
             return i
     return None
 
+from text_analysis import llm_match
+def variant_match(txt:str):
+    matches, match_stc = llm_match.variant_word_match(txt)
+    for match in matches:
+        variant_word = match[0].strip()
+        original_word = match[1].strip()
+
+        print("变体词:", variant_word)
+        print("原词", original_word)
+    print("修正语句:",match_stc[0].strip())
+
 # def intergrate_video(x, video_path, fragment_num, left_fragments, right_fragments, fragment_time, integrated_video_dir):
 #     input_files = []
 #     for i in range(left_fragments):

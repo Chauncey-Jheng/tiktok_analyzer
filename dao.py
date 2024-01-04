@@ -33,6 +33,32 @@ class DAO:
         cursor.close()
         return result
 
+    def insert_专用变体词(self,原词:str,变体词:str):
+        '''
+        向数据库中插入专用变体词
+        '''
+        sql = '''
+        INSERT INTO 专用变体词 (原词, 变体词)
+        VALUES ('{原词}', '{变体词}');
+        '''.format(原词=原词,变体词=变体词)
+        cursor = self.db.cursor()
+        cursor.execute(sql)
+        self.db.commit()
+        cursor.close()
+
+    def get_专用变体词(self):
+        '''
+        从数据库中查询专用变体词
+        '''
+        sql = '''
+        select * from 专用变体词匹配;
+        '''
+        cursor = self.db.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+
     def get_保健品(self):
         '''
         从数据库中获取保健品列表
@@ -227,6 +253,8 @@ class DAO:
         cursor.execute(sql)
         self.db.commit()
         cursor.close()
+    
+
     
     def get_通用敏感词匹配(self):
         '''

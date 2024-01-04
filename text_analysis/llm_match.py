@@ -1,6 +1,3 @@
-# from text_analysis import SparkApi
-import SparkApi
-
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -41,18 +38,50 @@ def checklen(text):
     while (getlength(text) > 8000):
         del text[0]
     return text
-    
 
+import re
+def variant_word_match(sentence):
+    prompt = """
+    接下来将给出一段话，请识别出这段话中的名词变体词，并给出对应原词，最后返回将变体词替换为原词的话。你给出的反馈以以下形式给出：
+    变体词:词1，对应原词:词1原词;
+    变体词:词2，对应原词:词2原词;
+    ……
+    修正语句：纠正后的语句
+
+    要识别的话如下:\n
+    """
+    input = prompt + sentence
+    text.clear
+    question = checklen(getText("user",input))
+    SparkApi.answer = ""
+    SparkApi.main(appid,api_key,api_secret,Spark_url,domain,question)
+    # print(SparkApi.answer)
+    pattern_variant = r'变体词：(.*?)，对应原词：(.*?)[；。]'
+    pattern_sentence = r'修正语句：(.*?)$'
+    matches = re.findall(pattern_variant, SparkApi.answer)
+    match_stc = re.findall(pattern_sentence, SparkApi.answer)
+    # print(match_stc[0].strip())
+    # for match in matches:
+    #     variant_word = match[0].strip()
+    #     original_word = match[1].strip()
+
+    #     print(variant_word)
+    #     print(original_word)
+    return matches, match_stc
 
 if __name__ == '__main__':
-    while(1):
-        text.clear
-        Input = input("\n" +"我:")
-        question = checklen(getText("user",Input))
-        SparkApi.answer =""
-        print("星火:",end = "")
-        SparkApi.main(appid,api_key,api_secret,Spark_url,domain,question)
-        print(SparkApi.answer)
-        getText("assistant",SparkApi.answer)
-        # print(str(text))
-
+    import SparkApi
+    variant_word_match("如果不是吃了我们的东西的话啊，他第二天就得去医院找白大褂了, 可见我们的产品具有显著的临某床意义")
+    # while(1):
+    #     text.clear
+        # Input = input("\n" +"我:")
+        # question = checklen(getText("user",Input))
+        # SparkApi.answer =""
+        # print("星火:",end = "")
+        # SparkApi.main(appid,api_key,api_secret,Spark_url,domain,question)
+        # print(SparkApi.answer)
+        # getText("assistant",SparkApi.answer)
+        # # print(str(text))
+        
+else:
+    from text_analysis import SparkApi
