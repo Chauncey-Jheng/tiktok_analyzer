@@ -22,6 +22,7 @@ def video_analyse(video_file:str, sensitive_video_dir:str, sensitive_video_queue
         result_txt += f.read()
     with open(video_ocr_result_file,"r") as f:
         result_txt += f.read()
+
     word = sensitive_match(result_txt)
 
     if word != None:
@@ -43,6 +44,29 @@ def video_analyse(video_file:str, sensitive_video_dir:str, sensitive_video_queue
         敏感词_id = dao.get_通用敏感词id(word)[0][0]
         dao.insert_通用敏感词匹配(str(live_id),str(敏感词_id))
         print("保存视频证据成功！")
+    else:
+        variant_match(result_txt)
+        variant_word = variant_match_from_database(result_txt)
+        if variant_word != None:
+            print("匹配到敏感词，正在保存视频数据...")
+            ## copy current file to another dir
+            time_stamp = time.strftime('%Y_%m_%d_%H_%M_%S',time.localtime(int(round(time.time()*1000))/1000))
+            save_video_file = sensitive_video_dir+"\\"+video_file.split("\\")[-1][:-4]+time_stamp+video_file[-4:]
+            save_asr_file = sensitive_video_dir+"\\"+video_asr_result_file.split("\\")[-1][:-4]+time_stamp+video_asr_result_file[-4:]
+            save_ocr_file = sensitive_video_dir+"\\"+video_ocr_result_file.split("\\")[-1][:-4]+time_stamp+video_ocr_result_file[-4:]
+            
+            shutil.copy(video_file, save_video_file)
+            shutil.copy(video_asr_result_file, save_asr_file)
+            shutil.copy(video_ocr_result_file, save_ocr_file)
+            ## add video file number to global sensitive_video_queue
+            # sensitive_video_queue.put(int(video_file[-8:-4]))
+            # print("sensitive_video_queue in video_analyse function:", sensitive_video_queue.empty())
+            dao.insert_live(live_url,live_name,save_video_file,save_ocr_file,save_asr_file)
+            live_id = dao.get_live_id_max()[0][0]
+            敏感词_id = dao.get_专用变体词id(word)[0][0]
+            dao.insert_专用变体词匹配(str(live_id),str(敏感词_id))
+            print("保存视频证据成功！")
+
 
 def sensitive_match(txt:str) -> str:
     sensitive_words = dao.get_通用敏感词()
@@ -52,16 +76,31 @@ def sensitive_match(txt:str) -> str:
             return i
     return None
 
+def variant_match_from_database(txt:str) -> str:
+    sensitive_words = dao.get_专用变体词()
+    sensitive_words = [i[2] for i in sensitive_words]
+    for i in sensitive_words:
+        if i in txt:
+            return i
+    return None
+
 from text_analysis import llm_match
 def variant_match(txt:str):
+    专用变体词 = dao.get_专用变体词()
+    专用变体词 = [i[2] for i in 专用变体词]
     matches, match_stc = llm_match.variant_word_match(txt)
     for match in matches:
         variant_word = match[0].strip()
         original_word = match[1].strip()
-
         print("变体词:", variant_word)
         print("原词", original_word)
+        if variant_word not in 专用变体词:
+            dao.insert_专用变体词(original_word, variant_word)
     print("修正语句:",match_stc[0].strip())
+
+
+    
+
 
 # def intergrate_video(x, video_path, fragment_num, left_fragments, right_fragments, fragment_time, integrated_video_dir):
 #     input_files = []

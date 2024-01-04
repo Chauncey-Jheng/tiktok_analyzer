@@ -58,7 +58,20 @@ class DAO:
         result = cursor.fetchall()
         cursor.close()
         return result
-
+    
+    def get_专用变体词id(self, word:str):
+        '''
+        查询专用变体词的id
+        '''
+        sql = """
+        select id from 专用变体词 where 变体词 = '{word}';
+        """.format(word=word)
+        cursor = self.db.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+    
     def get_保健品(self):
         '''
         从数据库中获取保健品列表
@@ -281,7 +294,33 @@ class DAO:
         cursor.execute(sql)
         self.db.commit()
         cursor.close()
+
+    def get_专用变体词匹配(self):
+        '''
+        从数据库中获取专用变体词匹配记录表
+        '''
+        sql = """
+        select * from 专用变体词匹配;
+        """
+        cursor = self.db.cursor()
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        cursor.close()
+        return result
     
+    def insert_专用变体词匹配(self,live_id:str,专用变体词_id:str):
+        '''
+        向数据库中插入专用变体词匹配记录
+        '''
+        sql = """
+        INSERT INTO 专用变体词匹配 (live_id, 专用变体词_id)
+        VALUES ('{live_id}', '{专用变体词_id}');
+        """.format(live_id=live_id, 专用变体词_id=专用变体词_id)
+        cursor = self.db.cursor()
+        cursor.execute(sql)
+        self.db.commit()
+        cursor.close()
+
     def get_live(self):
         '''
         从数据库中获取live记录表

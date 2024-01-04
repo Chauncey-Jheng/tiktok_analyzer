@@ -47,7 +47,9 @@ def variant_word_match(sentence):
     变体词:词2，对应原词:词2原词;
     ……
     修正语句：纠正后的语句
-
+    
+    此外，如果这段话中没有变体词，返回None即可。
+    
     要识别的话如下:\n
     """
     input = prompt + sentence
