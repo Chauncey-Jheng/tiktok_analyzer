@@ -1,80 +1,38 @@
-import wave
-import pyaudio
-from PIL import ImageGrab
-import numpy as np
-import cv2
-from moviepy.editor import *
-import time
+import argparse 
+from subprocess import call
+from sys import argv
 
-CHUNK = 1024
-FORMAT = pyaudio.paInt16
-CHANNELS = 2
-RATE = 44100
-WAVE_OUTPUT_FILENAME = "output.wav"
+def main():
+   parser = argparse.ArgumentParser("Recording video and audio using ffmpeg\n")
+   parser.add_argument("output", help="Set output file")
+   parser.add_argument("--vcodec", help="Set video codec")
+   parser.add_argument("--acodec", help="Set the audio codec. Setting this will enable audio, if it is not set no audio will be recorded")
+   parser.add_argument("-ox", "--offsetx", type=int, default=0, help="Set the x offset")
+   parser.add_argument("-oy", "--offsety", type=int, default=0, help="Set the y offset")
+   parser.add_argument("-r", "--fps", type=int, default=30, help="Set the fps")
+   parser.add_argument("-W", "--width", type=int, default=1900, help="Set the width of the recording area")
+   parser.add_argument("-H", "--height", type=int, default=1000, help="Set the height of the recording area")
+   parser.add_argument("-ac", "--audio_channels", type=int, default=2, help="Set the audio channels")
+   parser.add_argument("-t","--duration_time", type=int, default=20, help="Set the duration time")
+   args = parser.parse_args()
+   record(args)
+   
+def record(args):
+   output="static/video/record_video" + args.output
+   vcodec=args.vcodec
+   acodec=args.acodec
+   offsetx=str(args.offsetx)
+   offsety=str(args.offsety)
+   fps=str(args.fps)
+   width=str(args.width)
+   height=str(args.height)
+   ac=str(args.audio_channels)
+   time = str(args.duration_time)
+   print(args)
+   
+   cmdstr = "ffmpeg -y --enable-libxcb -f xcbgrab -s " + width + "x" + height + "  -i :0.0+" + offsetx + "," + offsety + " -ac " + ac + " -f alsa -i pulse -acodec libmp3lame " + " -t " + time + " " + output
+   call(cmdstr, shell=True)
 
-p = pyaudio.PyAudio()
-for i in range(p.get_device_count()):
-    print(p.get_device_info_by_index(i))
-input()
-wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
-wf.setnchannels(CHANNELS)
-wf.setsampwidth(p.get_sample_size(FORMAT))
-wf.setframerate(RATE)
-audio_record_flag = True
-def callback(in_data, frame_count, time_info, status):
-    wf.writeframes(in_data)
-    if audio_record_flag:
-        return (in_data, pyaudio.paContinue)
-    else:
-        return (in_data, pyaudio.paComplete)
-stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-                channels=wf.getnchannels(),
-                rate=wf.getframerate(),
-                input=True,
-                input_device_index=19,
-                stream_callback=callback)
-image = ImageGrab.grab()#获得当前屏幕
-width = image.size[0]
-height = image.size[1]
-print("width:", width, "height:", height)
-print("image mode:",image.mode)
-k=np.zeros((width,height),np.uint8)
 
-fourcc = cv2.VideoWriter_fourcc(*'XVID')#编码格式
-video = cv2.VideoWriter('test.mp4', fourcc, 9.5, (width, height))
-#经实际测试，单线程下最高帧率为10帧/秒，且会变动，因此选择9.5帧/秒
-#若设置帧率与实际帧率不一致，会导致视频时间与音频时间不一致
-
-print("video recording!!!!!")
-stream.start_stream()
-print("audio recording!!!!!")
-record_count = 0
-while True:
-    img_rgb = ImageGrab.grab()
-    img_bgr=cv2.cvtColor(np.array(img_rgb), cv2.COLOR_RGB2BGR)#转为opencv的BGR格式
-    video.write(img_bgr)
-    record_count += 1
-    if(record_count > 200):
-        break
-    print(record_count, time.time())
-
-audio_record_flag = False
-while stream.is_active():
-    time.sleep(1)
-
-stream.stop_stream()
-stream.close()
-wf.close()
-p.terminate()
-print("audio recording done!!!!!")
-
-video.release()
-cv2.destroyAllWindows()
-print("video recording done!!!!!")
-
-print("video audio merge!!!!!")
-audioclip = AudioFileClip("output.wav")
-videoclip = VideoFileClip("test.mp4")
-videoclip2 = videoclip.set_audio(audioclip)
-video = CompositeVideoClip([videoclip2])
-video.write_videofile("test2.mp4",codec='mpeg4')
+if __name__ == "__main__":
+    main()

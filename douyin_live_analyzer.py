@@ -19,9 +19,11 @@ def video_analyse(video_file:str, sensitive_video_dir:str, sensitive_video_queue
     video_ocr_result_file = video_file[:-4] + "_ocr.txt"
     result_txt = ""
     with open(video_asr_result_file,"r") as f:
-        result_txt += f.read()
+        asr_txt = f.read()
+        result_txt += asr_txt
     with open(video_ocr_result_file,"r") as f:
-        result_txt += f.read()
+        ocr_txt = f.read()
+        result_txt += ocr_txt
 
     word = sensitive_match(result_txt)
 
@@ -46,7 +48,7 @@ def video_analyse(video_file:str, sensitive_video_dir:str, sensitive_video_queue
         print("保存视频证据成功！")
     else:
         variant_match(result_txt)
-        variant_word = variant_match_from_database(result_txt)
+        variant_word = variant_match_from_database(asr_txt)
         if variant_word != None:
             print("匹配到敏感词，正在保存视频数据...")
             ## copy current file to another dir
@@ -94,7 +96,9 @@ def variant_match(txt:str):
         original_word = match[1].strip()
         print("变体词:", variant_word)
         print("原词", original_word)
-        if variant_word not in 专项变体词:
+        if (variant_word not in 专项变体词) \
+            and variant_word != original_word \
+            and len(variant_word) < 8:
             dao.insert_专项变体词(original_word, variant_word)
     print("修正语句:",match_stc[0].strip())
 

@@ -372,4 +372,5 @@ if __name__ == "__main__":
     # print(words)
     print(type(dao.get_live_id_max()[0][0]))
     print(dao.get_通用敏感词id("小脑")[0][0])
+    print(dao.get_专项变体词id("营养师")[0][0])
     # dao.insert_通用敏感词匹配(str(0),str(0))

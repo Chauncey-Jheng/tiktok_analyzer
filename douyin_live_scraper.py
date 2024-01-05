@@ -80,12 +80,16 @@ def download_live_stream_fragment(url_list:list, video_path:str, cache_time:int=
     iter_num = 0
     while(True):
         res = requests.get(url_list[0],stream=True)
-        with open(video_path + (4-len(str(iter_num)))*"0" + str(iter_num) + ".flv", 'wb') as f:    
+        file = video_path + (4-len(str(iter_num)))*"0" + str(iter_num) + ".flv"
+        with open(file, 'wb') as f:    
             for chunk in res.iter_content(chunk_size=1024):
                 f.write(chunk)
                 if time.time() - start_time > fragment_time:
                     start_time = time.time()
                     break
+        import os
+        if os.stat(file).st_size <= 1024:
+            break
         iter_num += 1
         if iter_num >= fragment_num:
             iter_num = 0
