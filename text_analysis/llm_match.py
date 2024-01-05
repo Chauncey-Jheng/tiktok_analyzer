@@ -57,18 +57,18 @@ def variant_word_match(sentence):
     question = checklen(getText("user",input))
     SparkApi.answer = ""
     SparkApi.main(appid,api_key,api_secret,Spark_url,domain,question)
-    # print(SparkApi.answer)
+    print(SparkApi.answer)
     pattern_variant = r'变体词：(.*?)，对应原词：(.*?)[；。]'
     pattern_sentence = r'修正语句：(.*?)$'
     matches = re.findall(pattern_variant, SparkApi.answer)
     match_stc = re.findall(pattern_sentence, SparkApi.answer)
-    # print(match_stc[0].strip())
-    # for match in matches:
-    #     variant_word = match[0].strip()
-    #     original_word = match[1].strip()
+    print(match_stc[0].strip())
+    for match in matches:
+        variant_word = match[0].strip()
+        original_word = match[1].strip()
 
-    #     print(variant_word)
-    #     print(original_word)
+        print(variant_word)
+        print(original_word)
     return matches, match_stc
 
 if __name__ == '__main__':

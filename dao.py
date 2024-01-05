@@ -33,12 +33,12 @@ class DAO:
         cursor.close()
         return result
 
-    def insert_专用变体词(self,原词:str,变体词:str):
+    def insert_专项变体词(self,原词:str,变体词:str):
         '''
-        向数据库中插入专用变体词
+        向数据库中插入专项变体词
         '''
         sql = '''
-        INSERT INTO 专用变体词 (原词, 变体词)
+        INSERT INTO 专项变体词 (原词, 变体词)
         VALUES ('{原词}', '{变体词}');
         '''.format(原词=原词,变体词=变体词)
         cursor = self.db.cursor()
@@ -46,12 +46,12 @@ class DAO:
         self.db.commit()
         cursor.close()
 
-    def get_专用变体词(self):
+    def get_专项变体词(self):
         '''
-        从数据库中查询专用变体词
+        从数据库中查询专项变体词
         '''
         sql = '''
-        select * from 专用变体词匹配;
+        select * from 专项变体词匹配;
         '''
         cursor = self.db.cursor()
         cursor.execute(sql)
@@ -59,12 +59,12 @@ class DAO:
         cursor.close()
         return result
     
-    def get_专用变体词id(self, word:str):
+    def get_专项变体词id(self, word:str):
         '''
-        查询专用变体词的id
+        查询专项变体词的id
         '''
         sql = """
-        select id from 专用变体词 where 变体词 = '{word}';
+        select id from 专项变体词 where 变体词 = '{word}';
         """.format(word=word)
         cursor = self.db.cursor()
         cursor.execute(sql)
@@ -295,12 +295,12 @@ class DAO:
         self.db.commit()
         cursor.close()
 
-    def get_专用变体词匹配(self):
+    def get_专项变体词匹配(self):
         '''
-        从数据库中获取专用变体词匹配记录表
+        从数据库中获取专项变体词匹配记录表
         '''
         sql = """
-        select * from 专用变体词匹配;
+        select * from 专项变体词匹配;
         """
         cursor = self.db.cursor()
         cursor.execute(sql)
@@ -308,14 +308,14 @@ class DAO:
         cursor.close()
         return result
     
-    def insert_专用变体词匹配(self,live_id:str,专用变体词_id:str):
+    def insert_专项变体词匹配(self,live_id:str,专项变体词_id:str):
         '''
-        向数据库中插入专用变体词匹配记录
+        向数据库中插入专项变体词匹配记录
         '''
         sql = """
-        INSERT INTO 专用变体词匹配 (live_id, 专用变体词_id)
-        VALUES ('{live_id}', '{专用变体词_id}');
-        """.format(live_id=live_id, 专用变体词_id=专用变体词_id)
+        INSERT INTO 专项变体词匹配 (live_id, 专项变体词_id)
+        VALUES ('{live_id}', '{专项变体词_id}');
+        """.format(live_id=live_id, 专项变体词_id=专项变体词_id)
         cursor = self.db.cursor()
         cursor.execute(sql)
         self.db.commit()

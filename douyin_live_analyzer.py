@@ -63,8 +63,8 @@ def video_analyse(video_file:str, sensitive_video_dir:str, sensitive_video_queue
             # print("sensitive_video_queue in video_analyse function:", sensitive_video_queue.empty())
             dao.insert_live(live_url,live_name,save_video_file,save_ocr_file,save_asr_file)
             live_id = dao.get_live_id_max()[0][0]
-            敏感词_id = dao.get_专用变体词id(word)[0][0]
-            dao.insert_专用变体词匹配(str(live_id),str(敏感词_id))
+            敏感词_id = dao.get_专项变体词id(word)[0][0]
+            dao.insert_专项变体词匹配(str(live_id),str(敏感词_id))
             print("保存视频证据成功！")
 
 
@@ -77,7 +77,7 @@ def sensitive_match(txt:str) -> str:
     return None
 
 def variant_match_from_database(txt:str) -> str:
-    sensitive_words = dao.get_专用变体词()
+    sensitive_words = dao.get_专项变体词()
     sensitive_words = [i[2] for i in sensitive_words]
     for i in sensitive_words:
         if i in txt:
@@ -86,16 +86,16 @@ def variant_match_from_database(txt:str) -> str:
 
 from text_analysis import llm_match
 def variant_match(txt:str):
-    专用变体词 = dao.get_专用变体词()
-    专用变体词 = [i[2] for i in 专用变体词]
+    专项变体词 = dao.get_专项变体词()
+    专项变体词 = [i[2] for i in 专项变体词]
     matches, match_stc = llm_match.variant_word_match(txt)
     for match in matches:
         variant_word = match[0].strip()
         original_word = match[1].strip()
         print("变体词:", variant_word)
         print("原词", original_word)
-        if variant_word not in 专用变体词:
-            dao.insert_专用变体词(original_word, variant_word)
+        if variant_word not in 专项变体词:
+            dao.insert_专项变体词(original_word, variant_word)
     print("修正语句:",match_stc[0].strip())
 
 
